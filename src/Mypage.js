@@ -1,12 +1,47 @@
-/* Mypage.js */
+/* Mypage.js（完成版） */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./FirebaseConfig.js";
+import {
+  useNavigate,
+  Navigate
+} from "react-router-dom";
 
 const Mypage = () => {
+  const [user, setUser] = useState("");
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+  }, []);
+
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    await signOut(auth);
+    navigate("/login/");
+  }
+
   return (
     <>
-      <h1>マイページ</h1>
-      <button>ログアウト</button>
+      {!loading && (
+        <>
+          {!user ? (
+            <Navigate to={`/login/`} />
+          ) : (
+            <>
+              <h1>マイページ</h1>
+              <p>{user?.email}</p>
+              <button onClick={logout}>ログアウト</button>
+            </>
+          )}
+        </>
+      )}
     </>
   );
 };
